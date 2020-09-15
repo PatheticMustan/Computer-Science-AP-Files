@@ -45,7 +45,6 @@ public class QuadraticFormula {
             (numberPart + " - " + complexPart)
         );
     } else { // normal answers, thank you very much
-        // stretch goal: 
         System.out.println(
             "Solutions are " +
             ((-b + Math.sqrt((b*b) - (4*a*c))) / (2 * a)) +

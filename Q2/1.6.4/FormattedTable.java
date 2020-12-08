@@ -29,7 +29,7 @@ public class FormattedTable {
         
         for (int[] row : table) {
             for (int num : row) {
-                System.out.printf("% " + ml +"d", num);
+                System.out.printf("% " + ml + "d", num);
             }
             System.out.print("\n");
         }

@@ -3,7 +3,7 @@ import java.util.Scanner;
 import java.util.Arrays;
 
 public class RPSLSArena {
-    public static final int NUM_PLAYERS = 4;
+    public static final int NUM_PLAYERS = 6;
     public static final boolean PAUSE_AFTER_MATCH = true;
     public static final int NUM_GAMES_PER_MATCH = 10000;
     
@@ -16,6 +16,8 @@ public class RPSLSArena {
         players[1] = new CopyBot();
         players[2] = new RepeatUntilLossBot();
         players[3] = new RockBot();
+        players[4] = new Elkerbot();
+        players[5] = new ElkTarotBot();
         int[] scores = new int[NUM_PLAYERS];
         
         //set up tournament schedule
@@ -64,8 +66,6 @@ public class RPSLSArena {
         for (int i = 0; i < players.length; i++) {
             System.out.printf("%30s: %d\n", players[i].getBotName(), scores[i]);
         }
-
-        input.close();
     }
     
     public static int judgeRPSLS(int player1move, int player2move) {
@@ -73,11 +73,11 @@ public class RPSLSArena {
             throw new IllegalArgumentException("Illegal move: " + player1move + ", " +
                                                                                  player2move);
         int[][] resultMatrix = { 
-            {0, 2, 1, 1, 2},
-            {1, 0, 2, 2, 1},
-            {2, 1, 0, 1, 2},
-            {2, 1, 2, 0, 1},
-            {1, 2, 1, 2, 0}};
+            {0, 2, 1, 1, 2}, // +1, +4
+            {1, 0, 2, 2, 1}, // +1, +2
+            {2, 1, 0, 1, 2}, // +2, +3
+            {2, 1, 2, 0, 1}, // +2, +4
+            {1, 2, 1, 2, 0}}; //+2, +4
         return resultMatrix[player1move][player2move];
     }
     

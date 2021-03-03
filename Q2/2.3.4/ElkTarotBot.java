@@ -23,24 +23,28 @@ public class ElkTarotBot implements RPSLSBot {
     }
 
     // 50 turns of diagnostics, try to trick the opponent into revealing their method
-    
     // rpsls, we beat them if ourMove == (n + 1) % 5 || ourMove == (n + 3) % 5
     public void opponentsLastMove(int move) {
-        opponentMoves[turn-1] = move;
+        opponentMoves[turn] = move;
     }
     
     public int getMove() {
         turn++;
         if (turn < diagnosticRounds) {
             // cycle through to see if the opponent responds
-            return move(turn % 5);
+            if (turn <= 30) return move(turn);
+            // constant spock to see if they use opponent's last move
+            return 4;
         }
-
+        
         // counter them!
         switch (strategy) {
             // s0 - beat opponent's last move
             case 0:
                 return move(opponentMoves[turn-1]+1);
+            case 1:
+                System.out.println((turn%5) + " --> " + opponentMoves[turn]);
+                return move(turn);
         }
         
         // otherwise, just do random
@@ -51,10 +55,12 @@ public class ElkTarotBot implements RPSLSBot {
         tarotMoves[turn] = m % 5;
         if (turn == 50) pickStrategy();
 
-        return m % 5;
+        return tarotMoves[turn];
     }
 
     public void pickStrategy() {
+        boolean talk = true;
+        
         int[] pm = Arrays.copyOfRange(tarotMoves, 0, diagnosticRounds);
         int[] om = Arrays.copyOfRange(opponentMoves, 0, diagnosticRounds);
 
@@ -71,26 +77,42 @@ public class ElkTarotBot implements RPSLSBot {
             unique.add(om[i]);
         }
         if (unique.size() == 1) {
+            if (talk) System.out.println("Constant");
             strategy = 0;
+            return;
         }
         
-        // repeat until loss
-
         // copybot
-        //if ()
+        int[] trm = Arrays.copyOfRange(tarotMoves, 0, 20);
+        int[] opm = Arrays.copyOfRange(opponentMoves, 1, 21);
+        System.out.println(Arrays.toString(trm));
+        System.out.println(Arrays.toString(opm));
+        if (Arrays.equals(trm, opm)) {
+            if (talk) System.out.println("Copybot");
+            strategy = 1;
+            return;
+        }
+        
+
+        // repeat until loss
 
         // counterbot
 
         // otherwise do repeat until loss bot
         
         System.out.println();
-        strategy = 1;
     }
 
-    // win???
-    public int cmp(int tarotMove, int opponentMove) {
-        if (tarotMove == opponentMove) return 0;
-        if ((opponentMove - tarotMove) % 5 < 3) return -1;
-        return 1;
+    public int cmp(int player1move, int player2move) {
+        if (player1move < 0 || player1move > 4 || player2move < 0 || player2move > 4)
+            throw new IllegalArgumentException("Illegal move: " + player1move + ", " +
+                                                                                 player2move);
+        int[][] resultMatrix = { 
+            {0, 2, 1, 1, 2}, // +1, +4
+            {1, 0, 2, 2, 1}, // +1, +2
+            {2, 1, 0, 1, 2}, // +2, +3
+            {2, 1, 2, 0, 1}, // +2, +4
+            {1, 2, 1, 2, 0}}; //+2, +4
+        return resultMatrix[player1move][player2move];
     }
 }

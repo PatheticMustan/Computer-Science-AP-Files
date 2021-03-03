@@ -1,5 +1,3 @@
-import java.lang.Math;
-
 public class RockBot implements RPSLSBot {
     public String getBotName() {
         return "RockBot";

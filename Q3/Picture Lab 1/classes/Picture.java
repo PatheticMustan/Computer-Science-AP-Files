@@ -213,6 +213,28 @@ public class Picture extends SimplePicture
       }
     }   
   }
+  
+  public void copy(Picture fromPic, int startRow, int endRow, int startCol, int endCol) {
+    Pixel fromPixel = null;
+    Pixel toPixel = null;
+    Pixel[][] toPixels = this.getPixels2D();
+    Pixel[][] fromPixels = fromPic.getPixels2D();
+    for (int fromRow = 0, toRow = startRow; 
+         fromRow < fromPixels.length &&
+         toRow < endRow; 
+         fromRow++, toRow++)
+    {
+      for (int fromCol = 0, toCol = startCol; 
+           fromCol < fromPixels[0].length &&
+           toCol < endCol;  
+           fromCol++, toCol++)
+      {
+        fromPixel = fromPixels[fromRow][fromCol];
+        toPixel = toPixels[toRow][toCol];
+        toPixel.setColor(fromPixel.getColor());
+      }
+    }   
+  }
 
   /** Method to create a collage of several pictures */
   public void createCollage()
@@ -282,15 +304,66 @@ public class Picture extends SimplePicture
       return rotated;
   }
   
-  
-  /* Main method for testing - each class in Java can have a main 
-   * method 
-   */
-  public static void main(String[] args) 
-  {
-    Picture beach = new Picture("images/beach.jpg");
-    beach.explore();
-    rotate90CW(beach).explore();
+  public void applyKernel(double[][] kernel) {
+    // setup vars
+    int h = this.getHeight(),
+        w = this.getWidth(),
+        kernelSize = 3,
+        middle = kernelSize / 2;
+        
+    Pixel[][] picture = this.getPixels2D();
+    Pixel[][] ref = new Picture(this).getPixels2D();
+
+    // loop through all pixels
+    for (int col=0; col<h; col++) {
+      for (int row=0; row<w; row++) {
+        int r = 0,
+            g = 0,
+            b = 0;
+        // kernel
+        for (int kernelY=0; kernelY<kernelSize; kernelY++) {
+          for (int kernelX=0; kernelX<kernelSize; kernelX++) {
+            // *will* throw out of bounds errors, but we might as well have fun
+            try {
+              r += ref[col+kernelY-middle][row+kernelX-middle].getRed() * kernel[kernelY][kernelX];
+              g += ref[col+kernelY-middle][row+kernelX-middle].getGreen() * kernel[kernelY][kernelX];
+              b += ref[col+kernelY-middle][row+kernelX-middle].getBlue() * kernel[kernelY][kernelX];
+            } catch (ArrayIndexOutOfBoundsException e) {
+              // ignore lmao
+              continue;
+            }
+          }
+        }
+        
+        int rf = Math.max(0, Math.min(r, 255)), // cap it to 0-255
+            gf = Math.max(0, Math.min(g, 255)),
+            bf = Math.max(0, Math.min(b, 255));
+        picture[col][row].setColor(new Color(rf, gf, bf));
+      }
+    }
   }
   
+  public static void main(String[] args) {
+    double[][] sharpen = new double[][] {
+      { 0, -1,  0 },
+      {-1,  5, -1 },
+      { 0, -1,  0 }
+    };
+
+    double[][] blur = new double[][] {
+      { 0.0625, 0.125,  0.0625 },
+      { 0.125,  0.25, 0.125 },
+      { 0.0625, 0.125,  0.0625 }
+    };
+
+    Picture bf = new Picture("images/butterfly1.jpg");
+    bf.explore();
+    bf.applyKernel(blur);
+    bf.explore();
+
+    Picture af = new Picture("images/beach.jpg");
+    af.explore();
+    af.applyKernel(sharpen);
+    af.explore();
+  }
 } // this } is the end of class Picture, put all new methods before this
